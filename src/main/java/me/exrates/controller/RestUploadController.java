@@ -1,6 +1,6 @@
 package me.exrates.controller;
 
-import me.exrates.ServiceEmailExtractor;
+import me.exrates.service.ServiceEmailExtractor;
 import me.exrates.model.Email;
 import me.exrates.model.InputEmailDto;
 import me.exrates.service.SendMailService;

@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <title>Exrates - send email</title>
 <body>
 
 <h1>Email sender</h1>
 
 <form method="POST" enctype="multipart/form-data" id="fileUploadForm">
-    <input type="text" name="subject" placeholder="Please input subject of emails"/><br/><br/>
-    <p><textarea rows="30" cols="150" name="template" placeholder="Please input email template here"></textarea></p>
-    <input type="file" name="file" accept=".txt"/><br/><br/>
+    <input type="text" name="subject" style="width: 20%" placeholder="Please input subject of emails"/><br/><br/>
+    <p><textarea rows="30" cols="150" name="template" placeholder="Please input email template here, template must contain {::publicId::} and {::host::}"></textarea></p>
+    <input type="file" name="file" accept=".txt,.json"/><br/><br/>
     <input type="submit" value="Submit" id="btnSubmit"/>
+    <br><br>
+    <p1>File extensions: .txt, .json</p1>
+    <br><br>
+    <p1>Format file:</p1>
+    <br><br>
+    <textarea name="" id="myTextarea" cols="100" rows="10"></textarea>
 </form>
 
 <pre>

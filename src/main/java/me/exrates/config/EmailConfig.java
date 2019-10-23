@@ -9,7 +9,7 @@ import java.util.Properties;
 
 @Configuration
 public class EmailConfig {
-    
+
     @Value("${mail.mail_support.host}")
     private String mailSupportHost;
     @Value("${mail.mail_support.port}")
@@ -20,7 +20,18 @@ public class EmailConfig {
     private String mailSupportUser;
     @Value("${mail.mail_support.password}")
     private String mailSupportPassword;
-    
+
+    @Value("${mail.mail_support_2.host}")
+    private String mailSupportHost2;
+    @Value("${mail.mail_support_2.port}")
+    private String mailSupportPort2;
+    @Value("${mail.mail_support_2.protocol}")
+    private String mailSupportProtocol2;
+    @Value("${mail.mail_support_2.user}")
+    private String mailSupportUser2;
+    @Value("${mail.mail_support_2.password}")
+    private String mailSupportPassword2;
+
     @Value("${mail.send_grid.host}")
     private String mailSendGridHost;
     @Value("${mail.send_grid.port}")
@@ -44,6 +55,24 @@ public class EmailConfig {
         javaMailProps.put("mail.smtp.auth", true);
         javaMailProps.put("mail.smtp.starttls.enable", true);
         javaMailProps.put("mail.smtp.ssl.trust", mailSupportHost);
+        javaMailProps.put("name", "SupportMailSender");
+        mailSenderImpl.setJavaMailProperties(javaMailProps);
+        return mailSenderImpl;
+    }
+
+    @Bean(name = "SupportMailSenderV2")
+    public JavaMailSenderImpl javaMailSenderImplV2() {
+        final JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
+        mailSenderImpl.setHost(mailSupportHost2);
+        mailSenderImpl.setPort(Integer.parseInt(mailSupportPort2));
+        mailSenderImpl.setProtocol(mailSupportProtocol2);
+        mailSenderImpl.setUsername(mailSupportUser2);
+        mailSenderImpl.setPassword(mailSupportPassword2);
+        final Properties javaMailProps = new Properties();
+        javaMailProps.put("mail.smtp.auth", true);
+        javaMailProps.put("mail.smtp.starttls.enable", true);
+        javaMailProps.put("mail.smtp.ssl.trust", mailSupportHost2);
+        javaMailProps.put("name", "SupportMailSenderV2");
         mailSenderImpl.setJavaMailProperties(javaMailProps);
         return mailSenderImpl;
     }
@@ -60,6 +89,7 @@ public class EmailConfig {
         javaMailProps.put("mail.smtp.auth", true);
         javaMailProps.put("mail.smtp.starttls.enable", false);
         javaMailProps.put("mail.smtp.ssl.trust", mailSendGridHost);
+        javaMailProps.put("name", "SendGridMailSender");
         mailSenderImpl.setJavaMailProperties(javaMailProps);
         return mailSenderImpl;
     }

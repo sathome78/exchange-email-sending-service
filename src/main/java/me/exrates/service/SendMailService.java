@@ -6,9 +6,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import javax.mail.internet.InternetAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,9 +19,9 @@ public class SendMailService {
 
     private static final Logger logger = LogManager.getLogger(SendMailService.class);
     private final static ExecutorService supportMailExecutors = Executors.newFixedThreadPool(3);
-    private final String SUPPORT_EMAIL = "no-reply@exrates.me";
+    private static int SWITCH = 1;
+    private final String SUPPORT_EMAIL = "no-reply@exrates.top";
     private final String HOST = "https://exrates.me";
-
     @Qualifier("SupportMailSender")
     @Autowired
     private JavaMailSender supportMailSender;
@@ -27,6 +29,10 @@ public class SendMailService {
     @Qualifier("SendGridMailSender")
     @Autowired
     private JavaMailSender sendGridMailSender;
+
+    @Qualifier("SupportMailSenderV2")
+    @Autowired
+    private JavaMailSender sendGridMailSenderV2;
 
     public void sendMail(Email email) {
         JavaMailSender sender = defineEmailSender(email.getTo());
@@ -46,7 +52,7 @@ public class SendMailService {
         try {
             mailSender.send(mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                message.setFrom(email.getFrom());
+                message.setFrom(new InternetAddress(email.getFrom(), "Exrates"));
                 message.setTo(email.getTo());
                 message.setSubject(email.getSubject());
                 message.setText(prepareTemplate(email.getMessage(), email.getProperties().getProperty("public_id")), true);
@@ -55,9 +61,13 @@ public class SendMailService {
                         message.addAttachment(attachment.getName(), attachment.getResource(), attachment.getContentType());
                 }
             });
-            logger.info("Email success sent to: {}", email.getTo());
+            logger.info("Email success sent to: {}, sender {}", email.getTo(),
+                    ((JavaMailSenderImpl) mailSender).getJavaMailProperties().getProperty("name"));
         } catch (Exception e) {
-            logger.error("Could not send email {}. Reason: {}", email, e.getMessage());
+            logger.error("Could not send email {}, sender {}, Reason: {}",
+                    email,
+                    ((JavaMailSenderImpl) mailSender).getJavaMailProperties().getProperty("name"),
+                    e.getMessage());
         }
     }
 
@@ -67,7 +77,14 @@ public class SendMailService {
         if (host.equalsIgnoreCase("icloud.com") || host.equalsIgnoreCase("exrates.me")) {
             return sendGridMailSender;
         }
-        return supportMailSender;
+
+        if (SWITCH == 1) {
+            SWITCH = 2;
+            return supportMailSender;
+        } else {
+            SWITCH = 1;
+            return sendGridMailSenderV2;
+        }
     }
 
     private String prepareTemplate(String body, String pubId) {

@@ -1,16 +1,19 @@
 mail:
   mail_support:
-    host: exrates.top
-    port: 25
-    protocol: smtp
-    user: no-reply@exrates.me
-    password: bMeT5Ua4vC
-  send_grid:
-    host: smtp.gmail.com
+    host: 172.31.7.44
     port: 587
     protocol: smtp
-    user: exrates.dev@gmail.com
-    password: setarxe123
-    allowedOnly: true
-    allowedEmails: avto12@i.ua,wayfarer2006@ukr.net,yagi7337@gmail.com,yagi3773@gmail.com,vlad.dziubak@gmail.com,nikita.dmytrenko@upholding.biz,oleg.kostiukevych@upholding.biz
-  default_mail_type: gmail
+    user: no-reply@exrates.top
+    password: 5zaL6GD2uJ
+  mail_support_2:
+    host: 172.31.1.96
+    port: 587
+    protocol: smtp
+    user: no-reply@exrates.top
+    password: 5zaL6GD2uJ
+  send_grid:
+    host: smtp.sendgrid.net
+    port: 25
+    protocol: smtp
+    user: StasGorobzeev
+    password: gkYY1k23YJRUxN4R
