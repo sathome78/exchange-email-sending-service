@@ -89,8 +89,7 @@ public class SendMailService {
 
     private String prepareTemplate(String body, String pubId) {
         body = body
-                .replace("{::publicId::}", pubId)
-                .replace("{::host::}", HOST);
+                .replace("{::publicId::}", pubId);
 
         return body;
     }

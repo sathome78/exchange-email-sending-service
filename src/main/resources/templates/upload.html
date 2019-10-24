@@ -7,7 +7,7 @@
 
 <form method="POST" enctype="multipart/form-data" id="fileUploadForm">
     <input type="text" name="subject" style="width: 20%" placeholder="Please input subject of emails"/><br/><br/>
-    <p><textarea rows="30" cols="150" name="template" placeholder="Please input email template here, template must contain {::publicId::} and {::host::}"></textarea></p>
+    <p><textarea rows="30" cols="150" name="template" placeholder="Please input email template here, template must contain {::publicId::}"></textarea></p>
     <input type="file" name="file" accept=".txt,.json"/><br/><br/>
     <input type="submit" value="Submit" id="btnSubmit"/>
     <br><br>
@@ -22,9 +22,7 @@
     <span id="result"></span>
 </pre>
 
-<script type="text/javascript"
-        src="webjars/jquery/2.2.4/jquery.min.js"></script>
-
+<script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 
 </body>
