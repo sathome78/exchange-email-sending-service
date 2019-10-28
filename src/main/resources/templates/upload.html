@@ -1,29 +1,106 @@
 <!DOCTYPE html>
 <html>
-<title>Exrates - send email</title>
+<head>
+    <title>Exrates - send email</title>
+
+    <script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script>
+        var stompClient = new window.StompJs.Client({
+            webSocketFactory: function () {
+                return new WebSocket("ws://localhost:8080/websocket");
+            }
+        });
+        stompClient.onConnect = function (frame) {
+            frameHandler(frame)
+        };
+        stompClient.onWebsocketClose = function () {
+            // onSocketClose();
+        };
+
+        stompClient.activate();
+
+        function frameHandler(frame) {
+            stompClient.subscribe('/topic/email_status', function (message) {
+                showMessage(message.body);
+            });
+        }
+
+        function showMessage(message) {
+            var msg = JSON.parse(message);
+            var status = msg['status'];
+            switch (status) {
+                case 'PROCESSING':
+                    $("#status").text("Send to " + msg['currentEmail'] + " success");
+                    $("#total_status").text("Total " + msg['currentNumber'] + "/" + msg['totalEmail']);
+                    break;
+                case 'FINISHED':
+                    $("#status").text("");
+                    $("#total_status").text("Work is finished");
+                    $("#btnSubmit").prop("disabled", false);
+                    break;
+                case 'ERROR':
+                    $("#responses").removeAttr('hidden');
+                    $("#responses").prepend("<tr>" +
+                        "<td>" + msg['error'] + "</td>" +
+                        "</tr>");
+                    break;
+            }
+        }
+    </script>
+</head>
 <body>
 
 <h1>Email sender</h1>
 
 <form method="POST" enctype="multipart/form-data" id="fileUploadForm">
     <input type="text" name="subject" style="width: 20%" placeholder="Please input subject of emails"/><br/><br/>
-    <p><textarea rows="30" cols="150" name="template" placeholder="Please input email template here, template must contain {::publicId::}"></textarea></p>
+    <p><textarea rows="30" cols="150" name="template"
+                 placeholder="Please input email template here, template must contain {::publicId::}"></textarea></p>
     <input type="file" name="file" accept=".txt,.json"/><br/><br/>
     <input type="submit" value="Submit" id="btnSubmit"/>
-    <br><br>
-    <p1>File extensions: .txt, .json</p1>
-    <br><br>
-    <p1>Format file:</p1>
-    <br><br>
-    <textarea name="" id="myTextarea" cols="100" rows="10"></textarea>
 </form>
 
 <pre>
     <span id="result"></span>
 </pre>
 
-<script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
+<pre>
+    <span id="status"></span>
+    <span id="total_status"></span>
+</pre>
 
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped" id="responses" hidden>
+            <thead>
+            <tr>
+                <th>Errors</th>
+            </tr>
+            </thead>
+            <tbody id="messages">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<br>
+<p1>File extensions: .txt, .json</p1>
+<br>
+<label for="format_file">Format file:</label>
+<br>
+<textarea id="format_file" cols="100" rows="9">
+{
+    "email": "email@gmail.com",
+    "pub_id": "cfd04fccdabdece15d7a"
+},
+{
+    "email": "email@ukr.com",
+    "pub_id": "fewfewf32ewf2v2cdscf"
+}
+</textarea>
 </body>
 </html>

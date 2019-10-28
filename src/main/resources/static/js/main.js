@@ -5,20 +5,6 @@ $(document).ready(function () {
     });
 });
 
-var myData = [
-    {
-        "email": "email@gmail.com",
-        "pub_id": "cfd04fccdabdece15d7a"
-    },
-    {
-        "email": "email@ukr.com",
-        "pub_id": "fewfewf32ewf2v2cdscf"
-    }
-];
-
-var textedJson = JSON.stringify(myData, undefined, 4);
-$('#myTextarea').text(textedJson);
-
 function fire_ajax_submit() {
     var form = $('#fileUploadForm')[0];
     var data = new FormData(form);
@@ -36,7 +22,7 @@ function fire_ajax_submit() {
         success: function (data) {
             $("#result").text(data);
             console.log("SUCCESS : ", data);
-            $("#btnSubmit").prop("disabled", false);
+            $("#btnSubmit").prop("disabled", true);
         },
         error: function (e) {
             $("#result").text(e.responseText);

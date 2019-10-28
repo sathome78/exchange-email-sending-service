@@ -1,9 +1,11 @@
 package me.exrates.controller;
 
-import me.exrates.service.ServiceEmailExtractor;
 import me.exrates.model.Email;
 import me.exrates.model.InputEmailDto;
+import me.exrates.model.StatusModel;
 import me.exrates.service.SendMailService;
+import me.exrates.service.ServiceEmailExtractor;
+import me.exrates.service.WebSocketClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,20 +19,27 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 public class RestUploadController {
-
+    private final static String PROCESSING = "PROCESSING";
+    private final static String FINISHED = "FINISHED";
+    private final static String ERROR = "ERROR";
     private final Logger logger = LoggerFactory.getLogger(RestUploadController.class);
-
     private final SendMailService sendMailService;
     private final ServiceEmailExtractor emailExtractor;
+    private final WebSocketClientService wsClient;
+    private final ExecutorService executorService;
 
     @Autowired
     public RestUploadController(SendMailService sendMailService,
-                                ServiceEmailExtractor emailExtractor) {
+                                ServiceEmailExtractor emailExtractor, WebSocketClientService wsClient) {
         this.sendMailService = sendMailService;
         this.emailExtractor = emailExtractor;
+        this.wsClient = wsClient;
+        this.executorService = Executors.newCachedThreadPool();
     }
 
 
@@ -54,7 +63,7 @@ public class RestUploadController {
                                              @RequestParam("file") MultipartFile uploadFile) {
 
         logger.info("Multiple file upload, subject {}", subject);
-        if (StringUtils.isEmpty(uploadFile)) {
+        if (StringUtils.isEmpty(uploadFile) || uploadFile.isEmpty()) {
             return new ResponseEntity<>("Please select a file!", HttpStatus.OK);
         }
 
@@ -66,9 +75,16 @@ public class RestUploadController {
             return new ResponseEntity<>("Please input subject!", HttpStatus.OK);
         }
 
-        List<InputEmailDto> emails = emailExtractor.extract(uploadFile);
+        executorService.execute(() -> sendEmail(uploadFile, subject, template));
 
-        for (InputEmailDto inputModel : emails) {
+        return new ResponseEntity<>("Successfully uploaded - "
+                + uploadFile.getOriginalFilename(), HttpStatus.OK);
+    }
+
+    private void sendEmail(MultipartFile uploadFile, String subject, String template) {
+        List<InputEmailDto> emails = emailExtractor.extract(uploadFile);
+        for (int i = 0; i < emails.size(); i++) {
+            InputEmailDto inputModel = emails.get(i);
             Email email = new Email();
             email.setTo(inputModel.getEmail());
             email.setSubject(subject);
@@ -76,9 +92,28 @@ public class RestUploadController {
             Properties properties = new Properties();
             properties.setProperty("public_id", inputModel.getPubId());
             email.setProperties(properties);
-            sendMailService.sendMail(email);
+            boolean result = sendMailService.sendMail(email);
+            if (result) {
+                StatusModel statusModel = new StatusModel(i + 1,
+                        emails.size(),
+                        inputModel.getEmail(),
+                        null,
+                        PROCESSING);
+                wsClient.sendStatusOk(statusModel);
+            } else {
+                StatusModel statusModel = new StatusModel(i + 1,
+                        emails.size(),
+                        inputModel.getEmail(),
+                        email.getTo(),
+                        ERROR);
+                wsClient.sendStatusOk(statusModel);
+            }
         }
-        return new ResponseEntity<>("Successfully uploaded - "
-                + uploadFile.getOriginalFilename(), HttpStatus.OK);
+        StatusModel statusModel = new StatusModel(0,
+                emails.size(),
+                null,
+                null,
+                FINISHED);
+        wsClient.sendStatusOk(statusModel);
     }
 }
