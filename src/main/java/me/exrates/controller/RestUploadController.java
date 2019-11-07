@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -82,28 +83,28 @@ public class RestUploadController {
     }
 
     private void sendEmail(MultipartFile uploadFile, String subject, String template) {
-        List<InputEmailDto> emails = emailExtractor.extract(uploadFile);
+        List<String> emails = emailExtractor.extractV2(uploadFile);
         for (int i = 0; i < emails.size(); i++) {
-            InputEmailDto inputModel = emails.get(i);
             Email email = new Email();
-            email.setTo(inputModel.getEmail());
+            String toEmail = emails.get(i);
+            email.setTo(toEmail);
             email.setSubject(subject);
             email.setMessage(template);
             Properties properties = new Properties();
-            properties.setProperty("public_id", inputModel.getPubId());
+            properties.setProperty("public_id", Base64.getEncoder().encodeToString(toEmail.getBytes()));
             email.setProperties(properties);
             boolean result = sendMailService.sendMail(email);
             if (result) {
                 StatusModel statusModel = new StatusModel(i + 1,
                         emails.size(),
-                        inputModel.getEmail(),
+                        toEmail,
                         null,
                         PROCESSING);
                 wsClient.sendStatusOk(statusModel);
             } else {
                 StatusModel statusModel = new StatusModel(i + 1,
                         emails.size(),
-                        inputModel.getEmail(),
+                        toEmail,
                         email.getTo(),
                         ERROR);
                 wsClient.sendStatusOk(statusModel);

@@ -80,7 +80,7 @@ public class SendMailService {
     }
 
     private String prepareTemplate(String body, String pubId) {
-        body = body.replace("{::publicId::}", pubId);
+        body = body.replace("{::token::}", pubId);
         return body;
     }
 }

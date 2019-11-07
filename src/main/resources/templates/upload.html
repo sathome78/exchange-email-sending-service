@@ -59,7 +59,7 @@
 <form method="POST" enctype="multipart/form-data" id="fileUploadForm">
     <input type="text" name="subject" style="width: 20%" placeholder="Please input subject of emails"/><br/><br/>
     <p><textarea rows="30" cols="150" name="template"
-                 placeholder="Please input email template here, template must contain {::publicId::}"></textarea></p>
+                 placeholder="Please input email template here, template must contain {::token::}"></textarea></p>
     <input type="file" name="file" accept=".txt,.json"/><br/><br/>
     <input type="submit" value="Submit" id="btnSubmit"/>
 </form>
@@ -94,16 +94,7 @@
 <label for="format_file">Format file:</label>
 <br>
 <textarea id="format_file" cols="100" rows="9">
-[
-    {
-        "email": "email@gmail.com",
-        "pub_id": "cfd04fccdabdece15d7a"
-    },
-    {
-        "email": "email@ukr.com",
-        "pub_id": "fewfewf32ewf2v2cdscf"
-    }
-]
+email@gmail.com, email@gmail.com, email@gmail.com
 </textarea>
 </body>
 </html>

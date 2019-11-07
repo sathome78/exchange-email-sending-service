@@ -5,7 +5,7 @@ target/
 .classpath
 *.class
 *.iml
-.idea/
+.idea
 .gradle/
 
 

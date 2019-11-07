@@ -11,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ServiceEmailExtractor {
@@ -24,7 +26,7 @@ public class ServiceEmailExtractor {
         this.objectMapper = objectMapper;
     }
 
-    public List<InputEmailDto> extract(MultipartFile multipartFile) {
+    public List<InputEmailDto> extractV1(MultipartFile multipartFile) {
         String inputString = "";
         try {
             inputString = new String(multipartFile.getBytes(), "UTF-8");
@@ -39,6 +41,17 @@ public class ServiceEmailExtractor {
             logger.error("Error parse string to InputEmailDto", e);
         }
         return result;
+    }
+
+    public List<String> extractV2(MultipartFile multipartFile) {
+        String inputString = "";
+        try {
+            inputString = new String(multipartFile.getBytes(), "UTF-8");
+        } catch (IOException e) {
+            logger.error("Error read file", e);
+        }
+
+        return Stream.of(inputString.split(",")).map(String::trim).collect(Collectors.toList());
     }
 
 }
