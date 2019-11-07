@@ -11,6 +11,7 @@
         var stompClient = new window.StompJs.Client({
             webSocketFactory: function () {
                 return new WebSocket("ws://email-sender.service:8080/websocket");
+                // return new WebSocket("ws://localhost:8080/websocket");
             }
         });
         stompClient.onConnect = function (frame) {
@@ -93,14 +94,16 @@
 <label for="format_file">Format file:</label>
 <br>
 <textarea id="format_file" cols="100" rows="9">
-{
-    "email": "email@gmail.com",
-    "pub_id": "cfd04fccdabdece15d7a"
-},
-{
-    "email": "email@ukr.com",
-    "pub_id": "fewfewf32ewf2v2cdscf"
-}
+[
+    {
+        "email": "email@gmail.com",
+        "pub_id": "cfd04fccdabdece15d7a"
+    },
+    {
+        "email": "email@ukr.com",
+        "pub_id": "fewfewf32ewf2v2cdscf"
+    }
+]
 </textarea>
 </body>
 </html>
